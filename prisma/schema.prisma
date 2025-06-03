@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id       String @id @default(cuid())
+  username String @unique
+  password String
+  email    String @unique
+  role     String @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  apiKeys  ApiKey[]
+  externalSites ExternalSite[]
+}
+
+model Donor {
+  id        String     @id @default(cuid())
+  name      String
+  email     String     @unique
+  phone     String?
+  type      DonorType  @default(CUSTOM_AMOUNT)
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  donations Donation[]
+  messages  Message[]
+}
+
+model Donation {
+  id          String     @id @default(cuid())
+  donorId     String
+  amount      Float?
+  type        DonorType
+  description String?
+  date        DateTime   @default(now())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  donor Donor @relation(fields: [donorId], references: [id], onDelete: Cascade)
+}
+
+model InventoryItem {
+  id                String   @id @default(cuid())
+  name              String
+  category          String
+  quantity          Int      @default(0)
+  lowStockThreshold Int      @default(10)
+  isForSale         Boolean  @default(false)
+  price             Float?
+  description       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Message {
+  id       String      @id @default(cuid())
+  donorId  String
+  type     MessageType
+  subject  String
+  content  String
+  status   MessageStatus @default(PENDING)
+  sentAt   DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  donor Donor @relation(fields: [donorId], references: [id], onDelete: Cascade)
+}
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  name        String
+  key         String   @unique
+  adminId     String
+  permissions Json     @default("{\"canReadDonors\":true,\"canReadDonations\":true,\"canReadEmails\":false}")
+  lastUsed    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+}
+
+model ExternalSite {
+  id          String   @id @default(cuid())
+  name        String
+  baseUrl     String
+  apiEndpoint String
+  apiKey      String
+  adminId     String
+  isActive    Boolean  @default(true)
+  autoSync    Boolean  @default(false)
+  syncInterval String  @default("60") // in minutes
+  lastSync    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+}
+
+enum DonorType {
+  FOOD_AND_NUTRITION
+  MEDICAL_CARE
+  SHELTER_AND_HOUSING
+  WINTER_CARE
+  EMERGENCY_FUND
+  CUSTOM_AMOUNT
+}
+
+enum MessageType {
+  THANK_YOU
+  REMINDER
+  NEWSLETTER
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  FAILED
+}

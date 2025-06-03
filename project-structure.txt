@@ -1,0 +1,101 @@
+ngo-management-system/
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   │   ├── database.js
+│   │   │   ├── cache.js
+│   │   │   ├── email.js
+│   │   │   └── logger.js
+│   │   ├── controllers/
+│   │   │   ├── donorController.js
+│   │   │   ├── donationController.js
+│   │   │   ├── inventoryController.js
+│   │   │   ├── messageController.js
+│   │   │   └── authController.js
+│   │   ├── middleware/
+│   │   │   ├── auth.js
+│   │   │   ├── rateLimiter.js
+│   │   │   ├── errorHandler.js
+│   │   │   └── validate.js
+│   │   ├── routes/
+│   │   │   ├── donorRoutes.js
+│   │   │   ├── donationRoutes.js
+│   │   │   ├── inventoryRoutes.js
+│   │   │   ├── messageRoutes.js
+│   │   │   └── authRoutes.js
+│   │   ├── services/
+│   │   │   ├── donorService.js
+│   │   │   ├── donationService.js
+│   │   │   ├── inventoryService.js
+│   │   │   ├── messageService.js
+│   │   │   ├── cacheService.js
+│   │   │   └── emailService.js
+│   │   ├── utils/
+│   │   │   ├── asyncHandler.js
+│   │   │   ├── dateUtils.js
+│   │   │   └── responseFormatter.js
+│   │   ├── jobs/
+│   │   │   ├── emailQueue.js
+│   │   │   ├── reportQueue.js
+│   │   │   └── processors/
+│   │   │       ├── emailProcessor.js
+│   │   │       └── reportProcessor.js
+│   │   ├── analytics/
+│   │   │   ├── donorAnalytics.js
+│   │   │   └── inventoryAnalytics.js
+│   │   ├── validations/
+│   │   │   ├── donorSchema.js
+│   │   │   ├── donationSchema.js
+│   │   │   └── inventorySchema.js
+│   │   └── app.js
+│   ├── prisma/
+│   │   └── schema.prisma (existing)
+│   ├── .env
+│   └── package.json
+│
+└── frontend/
+    ├── src/
+    │   ├── components/
+    │   │   ├── ui/ (shadcn components)
+    │   │   ├── layout/
+    │   │   │   ├── Sidebar.jsx
+    │   │   │   ├── Header.jsx
+    │   │   │   └── Layout.jsx
+    │   │   ├── donors/
+    │   │   │   ├── DonorList.jsx
+    │   │   │   ├── DonorForm.jsx
+    │   │   │   └── DonorDetails.jsx
+    │   │   ├── donations/
+    │   │   │   ├── DonationList.jsx
+    │   │   │   └── DonationForm.jsx
+    │   │   ├── inventory/
+    │   │   │   ├── InventoryList.jsx
+    │   │   │   └── InventoryForm.jsx
+    │   │   └── dashboard/
+    │   │       ├── DashboardStats.jsx
+    │   │       ├── TopDonorsChart.jsx
+    │   │       └── LowStockAlert.jsx
+    │   ├── hooks/
+    │   │   ├── useAuth.js
+    │   │   └── usePagination.js
+    │   ├── pages/
+    │   │   ├── Dashboard.jsx
+    │   │   ├── Donors.jsx
+    │   │   ├── Donations.jsx
+    │   │   ├── Inventory.jsx
+    │   │   ├── Messages.jsx
+    │   │   └── Login.jsx
+    │   ├── services/
+    │   │   ├── api.js
+    │   │   ├── donorService.js
+    │   │   ├── donationService.js
+    │   │   └── inventoryService.js
+    │   ├── utils/
+    │   │   ├── dateFormatter.js
+    │   │   └── currencyFormatter.js
+    │   ├── context/
+    │   │   └── AuthContext.jsx
+    │   ├── App.jsx
+    │   └── main.jsx
+    ├── .env
+    └── package.json
