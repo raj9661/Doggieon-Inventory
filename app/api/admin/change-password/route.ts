@@ -2,24 +2,30 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { verifyToken, getTokenFromRequest, comparePasswords, hashPassword } from "@/lib/auth"
 
-// Explicitly configure this as a Node.js API route
-export const runtime = 'nodejs'
+// Route segment config
 export const dynamic = 'force-dynamic'
-export const fetchCache = 'force-no-store'
+export const runtime = 'nodejs'
+export const preferredRegion = 'auto'
+
+// Remove fetchCache as it's not needed for API routes
+// export const fetchCache = 'force-no-store'
 
 // Use environment variable for JWT secret
 const JWT_SECRET = process.env.JWT_SECRET || "ngo-management-secret-key-2024"
 
+// App Router API route handler
 export async function POST(request: NextRequest) {
   try {
     console.log("Change password request received")
     const token = getTokenFromRequest(request)
     console.log("Token from request:", token ? "exists" : "not found")
-    console.log("Full cookie header:", request.headers.get("cookie"))
     
     if (!token) {
       console.log("No token found in request")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return new NextResponse(
+        JSON.stringify({ error: "Unauthorized" }), 
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      )
     }
 
     console.log("Attempting to verify token...")
@@ -28,15 +34,11 @@ export async function POST(request: NextRequest) {
     
     if (!decoded) {
       console.log("Token verification failed")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return new NextResponse(
+        JSON.stringify({ error: "Unauthorized" }), 
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      )
     }
-
-    console.log("Token payload:", {
-      id: decoded.id,
-      username: decoded.username,
-      role: decoded.role,
-      exp: decoded.exp ? new Date(decoded.exp * 1000).toISOString() : "no expiry",
-    })
 
     const { currentPassword, newPassword } = await request.json()
 
@@ -46,13 +48,19 @@ export async function POST(request: NextRequest) {
     })
 
     if (!admin) {
-      return NextResponse.json({ error: "Admin not found" }, { status: 404 })
+      return new NextResponse(
+        JSON.stringify({ error: "Admin not found" }), 
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      )
     }
 
     // Verify current password
     const passwordMatch = await comparePasswords(currentPassword, admin.password)
     if (!passwordMatch) {
-      return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 })
+      return new NextResponse(
+        JSON.stringify({ error: "Current password is incorrect" }), 
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      )
     }
 
     // Hash new password
@@ -64,12 +72,18 @@ export async function POST(request: NextRequest) {
       data: { password: hashedPassword }
     })
 
-    return NextResponse.json({ message: "Password updated successfully" })
+    return new NextResponse(
+      JSON.stringify({ message: "Password updated successfully" }), 
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    )
   } catch (error: any) {
     console.error("Error changing password:", error)
-    return NextResponse.json({ 
-      error: "Failed to change password",
-      details: error?.message || "Unknown error"
-    }, { status: 500 })
+    return new NextResponse(
+      JSON.stringify({ 
+        error: "Failed to change password",
+        details: error?.message || "Unknown error"
+      }), 
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
   }
 } 
