@@ -7,15 +7,31 @@ const JWT_SECRET = "ngo-management-secret-key-2024"
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("Change password request received")
     const token = getTokenFromRequest(request)
-    if (!token || !verifyToken(token)) {
+    console.log("Token from request:", token ? "exists" : "not found")
+    console.log("Full cookie header:", request.headers.get("cookie"))
+    
+    if (!token) {
+      console.log("No token found in request")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const decoded = verifyToken(token)
+    console.log("Attempting to verify token...")
+    const decoded = await verifyToken(token)
+    console.log("Token verification result:", decoded ? "valid" : "invalid")
+    
     if (!decoded) {
+      console.log("Token verification failed")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    console.log("Token payload:", {
+      id: decoded.id,
+      username: decoded.username,
+      role: decoded.role,
+      exp: decoded.exp ? new Date(decoded.exp * 1000).toISOString() : "no expiry",
+    })
 
     const { currentPassword, newPassword } = await request.json()
 

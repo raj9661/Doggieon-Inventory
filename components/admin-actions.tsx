@@ -13,7 +13,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { LogOutIcon, KeyRoundIcon } from "lucide-react"
-import Cookies from "js-cookie"
 import { useRouter } from "next/navigation"
 
 export default function AdminActions() {
@@ -27,7 +26,7 @@ export default function AdminActions() {
   const router = useRouter()
 
   const handleLogout = () => {
-    Cookies.remove("token")
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
     router.push("/login")
   }
 
@@ -46,13 +45,12 @@ export default function AdminActions() {
         return
       }
 
-      const token = Cookies.get("token")
       const response = await fetch("/api/admin/change-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({
           currentPassword: passwords.currentPassword,
           newPassword: passwords.newPassword,

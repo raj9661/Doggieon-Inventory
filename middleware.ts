@@ -8,7 +8,7 @@ const JWT_SECRET = "ngo-management-secret-key-2024"
 // Add paths that don't require authentication
 const publicPaths = ["/login", "/api/auth/login"]
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   console.log("Middleware processing path:", pathname)
 
@@ -24,6 +24,7 @@ export function middleware(request: NextRequest) {
   
   if (token) {
     console.log("Token value (first 10 chars):", token.substring(0, 10) + "...")
+    console.log("Full cookie header:", request.headers.get("cookie"))
   }
 
   // If no token and trying to access protected route, redirect to login
@@ -36,30 +37,40 @@ export function middleware(request: NextRequest) {
   // If token exists, verify it using edge-compatible verification
   if (token) {
     console.log("Attempting to verify token...")
-    const decoded = verifyTokenEdge(token)
-    console.log("Token verification result:", decoded ? "valid" : "invalid")
-    
-    if (decoded) {
-      console.log("Token payload:", {
-        id: decoded.id,
-        username: decoded.username,
-        role: decoded.role,
-        exp: decoded.exp ? new Date(decoded.exp * 1000).toISOString() : "no expiry",
-      })
-    }
-    
-    // If token is invalid and trying to access protected route, redirect to login
-    if (!decoded && !pathname.startsWith("/api/")) {
-      console.log("Invalid token, redirecting to login")
-      const url = new URL("/login", request.url)
-      return NextResponse.redirect(url)
-    }
+    try {
+      const decoded = await verifyTokenEdge(token)
+      console.log("Token verification result:", decoded ? "valid" : "invalid")
+      
+      if (decoded) {
+        console.log("Token payload:", {
+          id: decoded.id,
+          username: decoded.username,
+          role: decoded.role,
+          exp: decoded.exp ? new Date(decoded.exp * 1000).toISOString() : "no expiry",
+        })
+      } else {
+        console.log("Token verification failed")
+      }
+      
+      // If token is invalid and trying to access protected route, redirect to login
+      if (!decoded && !pathname.startsWith("/api/")) {
+        console.log("Invalid token, redirecting to login")
+        const url = new URL("/login", request.url)
+        return NextResponse.redirect(url)
+      }
 
-    // If on login page with valid token, redirect to dashboard
-    if (decoded && pathname === "/login") {
-      console.log("Valid token on login page, redirecting to dashboard")
-      const url = new URL("/dashboard", request.url)
-      return NextResponse.redirect(url)
+      // If on login page with valid token, redirect to dashboard
+      if (decoded && pathname === "/login") {
+        console.log("Valid token on login page, redirecting to dashboard")
+        const url = new URL("/dashboard", request.url)
+        return NextResponse.redirect(url)
+      }
+    } catch (error) {
+      console.error("Error verifying token:", error)
+      if (!pathname.startsWith("/api/")) {
+        const url = new URL("/login", request.url)
+        return NextResponse.redirect(url)
+      }
     }
   }
 
