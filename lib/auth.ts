@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server"
+import { Buffer } from 'buffer'
 
 // Use a more reliable secret key
 const JWT_SECRET = process.env.JWT_SECRET || "ngo-management-secret-key-2024"
@@ -12,11 +13,12 @@ export interface TokenPayload {
 }
 
 // Helper to get a crypto key for HMAC
-async function getCryptoKey() {
+async function getCryptoKey(): Promise<CryptoKey> {
   const enc = new TextEncoder()
-  return await (globalThis.crypto || (await import('crypto')).webcrypto).subtle.importKey(
+  const keyData = enc.encode(JWT_SECRET)
+  return await crypto.subtle.importKey(
     "raw",
-    enc.encode(JWT_SECRET),
+    keyData,
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign", "verify"]
@@ -32,14 +34,23 @@ export async function generateToken(adminId: string): Promise<string> {
   }
   const payloadStr = JSON.stringify(payload)
   const payloadBase64 = btoa(payloadStr)
-  const key = await getCryptoKey()
-  const sigBuf = await (globalThis.crypto || (await import('crypto')).webcrypto).subtle.sign(
-    "HMAC",
-    key,
-    new TextEncoder().encode(payloadBase64)
-  )
-  const signature = Buffer.from(new Uint8Array(sigBuf)).toString('hex')
-  return `${payloadBase64}.${signature}`
+  
+  // Use Node.js crypto in Node.js environment, Web Crypto API in Edge
+  if (typeof process !== 'undefined' && process.versions?.node) {
+    const crypto = await import('crypto')
+    const hmac = crypto.createHmac('sha256', JWT_SECRET)
+    hmac.update(payloadBase64)
+    return `${payloadBase64}.${hmac.digest('hex')}`
+  } else {
+    const key = await getCryptoKey()
+    const sigBuf = await crypto.subtle.sign(
+      "HMAC",
+      key,
+      new TextEncoder().encode(payloadBase64)
+    )
+    const signature = Buffer.from(new Uint8Array(sigBuf)).toString('hex')
+    return `${payloadBase64}.${signature}`
+  }
 }
 
 // Verify a token (works in both Edge and Node.js)
@@ -47,14 +58,25 @@ export async function verifyToken(token: string): Promise<TokenPayload | null> {
   try {
     const [payloadBase64, signature] = token.split('.')
     if (!payloadBase64 || !signature) return null
-    const key = await getCryptoKey()
-    const valid = await (globalThis.crypto || (await import('crypto')).webcrypto).subtle.verify(
-      "HMAC",
-      key,
-      Buffer.from(signature, 'hex'),
-      new TextEncoder().encode(payloadBase64)
-    )
-    if (!valid) return null
+
+    // Use Node.js crypto in Node.js environment, Web Crypto API in Edge
+    if (typeof process !== 'undefined' && process.versions?.node) {
+      const crypto = await import('crypto')
+      const hmac = crypto.createHmac('sha256', JWT_SECRET)
+      hmac.update(payloadBase64)
+      const expectedSignature = hmac.digest('hex')
+      if (signature !== expectedSignature) return null
+    } else {
+      const key = await getCryptoKey()
+      const valid = await crypto.subtle.verify(
+        "HMAC",
+        key,
+        Buffer.from(signature, 'hex'),
+        new TextEncoder().encode(payloadBase64)
+      )
+      if (!valid) return null
+    }
+
     const payloadStr = atob(payloadBase64)
     const payload = JSON.parse(payloadStr) as TokenPayload
     if (!payload.id) return null

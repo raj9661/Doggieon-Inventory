@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { verifyToken, getTokenFromRequest, comparePasswords, hashPassword } from "@/lib/auth"
 
+// Configure runtime to use Node.js
+export const runtime = 'nodejs'
+
 // Use the same secret key as in auth library
-const JWT_SECRET = "ngo-management-secret-key-2024"
+const JWT_SECRET = process.env.JWT_SECRET || "ngo-management-secret-key-2024"
 
 export async function POST(request: NextRequest) {
   try {
