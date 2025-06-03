@@ -3,14 +3,18 @@ import { prisma } from "@/lib/db"
 import { comparePasswords, generateToken } from "@/lib/auth"
 
 // Route segment configuration
-export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
-export const preferredRegion = 'auto'
-export const fetchCache = 'force-no-store'
-export const revalidate = 0
+export const config = {
+  api: {
+    bodyParser: true,
+  },
+}
 
 // Basic route handler
-export async function POST(req: NextRequest) {
+export default async function handler(req: NextRequest) {
+  if (req.method !== 'POST') {
+    return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
+  }
+
   try {
     const { username, password } = await req.json()
 
@@ -57,4 +61,4 @@ export async function POST(req: NextRequest) {
     console.error('Login error:', error)
     return NextResponse.json({ error: "Login failed" }, { status: 500 })
   }
-}
+} 
