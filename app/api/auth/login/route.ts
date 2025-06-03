@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { comparePasswords, generateToken } from "@/lib/auth"
 
+// Route segment configuration
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+export const preferredRegion = 'auto'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
+
 // Basic route handler
 export async function POST(req: NextRequest) {
   try {
@@ -47,6 +54,7 @@ export async function POST(req: NextRequest) {
 
     return response
   } catch (error) {
+    console.error('Login error:', error)
     return NextResponse.json({ error: "Login failed" }, { status: 500 })
   }
 }
