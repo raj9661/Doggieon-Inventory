@@ -6,9 +6,13 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "NGO Management System",
-  description: "Comprehensive inventory and donor management system for NGOs",
-    generator: 'v0.dev'
+  title: "Doggiedon Inventory",
+  description: "Comprehensive inventory and donor management system for Doggiedon",
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -18,6 +22,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/logo.png" />
+        <link rel="apple-touch-icon" href="/logo.png" />
+      </head>
       <body className={inter.className} suppressHydrationWarning>
         {children}
       </body>
