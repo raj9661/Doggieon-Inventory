@@ -81,7 +81,14 @@ export function getTokenFromRequest(request: NextRequest): string | null {
     const cookies = cookieHeader.split(";")
     const tokenCookie = cookies.find(cookie => cookie.trim().startsWith("token="))
     if (tokenCookie) {
-      return tokenCookie.split("=")[1]
+      // Decode the URL-encoded token
+      const encodedToken = tokenCookie.split("=")[1]
+      try {
+        return decodeURIComponent(encodedToken)
+      } catch {
+        // If decoding fails, return the original token
+        return encodedToken
+      }
     }
   }
   
