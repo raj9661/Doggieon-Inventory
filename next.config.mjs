@@ -9,10 +9,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // App Router specific config
+  // Minimal experimental config
   experimental: {
     serverActions: true,
-    appDir: true,
   },
   // Remove API config as it's for Pages Router
   // api: {
