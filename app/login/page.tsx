@@ -46,17 +46,30 @@ export default function Login() {
         credentials: "include", // Important: This allows cookies to be set
       })
 
-      const data = await response.json()
-      console.log("Login response:", data)
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        // If JSON parsing fails, try to get the raw text
+        const text = await response.text();
+        throw new Error(`Login failed: ${text || 'Unknown error'}`);
+      }
 
-      if (response.ok && data.success) {
+      // Check if the response was not ok (status not in 200-299 range)
+      if (!response.ok) {
+        throw new Error(data?.error || data?.message || `Login failed with status: ${response.status}`);
+      }
+
+      // At this point we have valid JSON data and a successful response
+      if (data.success) {
         // Store admin info in localStorage (not sensitive data)
         localStorage.setItem("admin", JSON.stringify(data.admin))
         
         // Force a hard navigation to dashboard
         window.location.href = "/dashboard"
       } else {
-        setError(data.error || "Login failed")
+        // This shouldn't happen with the current API, but handle it just in case
+        throw new Error(data.error || "Login failed: Unexpected response format")
       }
     } catch (error) {
       console.error("Login error:", error)
