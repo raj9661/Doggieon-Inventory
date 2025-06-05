@@ -23,16 +23,19 @@ export default function AdminActions() {
     confirmPassword: "",
   })
   const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const handleLogout = () => {
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+    localStorage.removeItem("admin")
     router.push("/login")
   }
 
   const handleChangePassword = async () => {
     try {
       setError("")
+      setIsLoading(true)
 
       // Validate passwords
       if (passwords.newPassword !== passwords.confirmPassword) {
@@ -45,20 +48,26 @@ export default function AdminActions() {
         return
       }
 
-      const response = await fetch("/api/admin/change-password", {
+      const response = await fetch("/api/change-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
+        credentials: "include", // This ensures cookies are sent with the request
         body: JSON.stringify({
           currentPassword: passwords.currentPassword,
           newPassword: passwords.newPassword,
         }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const data = await response.json()
+        if (response.status === 401) {
+          // Handle unauthorized - redirect to login
+          handleLogout()
+          return
+        }
         throw new Error(data.error || "Failed to change password")
       }
 
@@ -72,6 +81,8 @@ export default function AdminActions() {
       alert("Password changed successfully")
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to change password")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -118,14 +129,14 @@ export default function AdminActions() {
               />
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button onClick={handleChangePassword} className="w-full">
-              Change Password
+            <Button onClick={handleChangePassword} className="w-full" disabled={isLoading}>
+              {isLoading ? "Changing Password..." : "Change Password"}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      <Button variant="destructive" size="sm" onClick={handleLogout}>
+      <Button variant="outline" size="sm" onClick={handleLogout}>
         <LogOutIcon className="h-4 w-4 mr-2" />
         Logout
       </Button>
