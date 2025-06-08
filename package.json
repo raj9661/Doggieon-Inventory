@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
-    "start": "next start",
+    "build": "cross-env NODE_ENV=production prisma generate && next build",
+    "start": "cross-env NODE_ENV=production next start",
+    "analyze": "cross-env ANALYZE=true next build",
     "lint": "next lint",
     "postinstall": "prisma generate",
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
@@ -44,7 +45,7 @@
     "@radix-ui/react-toggle": "1.1.1",
     "@radix-ui/react-toggle-group": "1.1.1",
     "@radix-ui/react-tooltip": "1.1.6",
-    "@tanstack/react-query": "latest",
+    "@tanstack/react-query": "^5.80.6",
     "@types/bcryptjs": "^2.4.6",
     "@types/js-cookie": "^3.0.6",
     "@types/jsonwebtoken": "^9.0.5",
@@ -90,6 +91,8 @@
     "zod": "^3.25.55"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",
+    "@babel/plugin-proposal-optional-chaining": "^7.21.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20",
@@ -98,6 +101,8 @@
     "@types/react-dom": "^18.2.0",
     "@types/uuid": "^9.0.8",
     "autoprefixer": "^10.4.21",
+    "babel-plugin-transform-remove-console": "^6.9.4",
+    "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.1.1",
     "postcss": "^8.5.4",

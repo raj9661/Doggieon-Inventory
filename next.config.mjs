@@ -7,13 +7,31 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    domains: [], // Add your image domains here
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  // Minimal experimental config
   experimental: {
     serverActions: true,
+    optimizeCss: true,
+    serverComponentsExternalPackages: ['@prisma/client'],
   },
-  // Remove API config as it's for Pages Router
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  swcMinify: true,
+  reactStrictMode: true,
+  poweredByHeader: false,
+  compress: true,
+  // Force SWC compiler instead of Babel
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': '.',
+    }
+    return config
+  },
+  // Minimal experimental config
   // api: {
   //   bodyParser: {
   //     sizeLimit: '1mb',

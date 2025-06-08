@@ -1,6 +1,8 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { OptimizedImage } from "@/components/ui/optimized-image"
+import Providers from "@/components/providers"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -22,12 +24,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" href="/logo.png" />
-        <link rel="apple-touch-icon" href="/logo.png" />
-      </head>
+      <head />
       <body className={inter.className} suppressHydrationWarning>
-        {children}
+        <div className="fixed top-4 left-4 z-50">
+          <OptimizedImage
+            src="/logo.png"
+            alt="Doggiedon Logo"
+            width={32}
+            height={32}
+            priority
+          />
+        </div>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   )

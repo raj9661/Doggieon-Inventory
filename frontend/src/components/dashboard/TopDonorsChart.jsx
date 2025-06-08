@@ -2,8 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { getTopDonors } from "../../services/donorService"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState } from "react"
 import { formatCurrency } from "../../utils/currencyFormatter"
 import { motion } from "framer-motion"
